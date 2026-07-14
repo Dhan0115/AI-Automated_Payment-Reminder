@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@nuxt/ui": "^4.9.0",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "nuxt": "^4.4.5"
+  },
+  "scripts": {
+    "dev": "nuxi dev",
+    "report": "./scripts/generate_report.sh"
+  }
+}
