@@ -3,7 +3,7 @@ set -euo pipefail
 
 log_dir="${HOME}/.cache/daily-report"
 log_file="${log_dir}/errors.log"
-mkdir -p "$repo_root/report/daily-report.md"
+mkdir -p "$log_dir"
 
 on_error() {
   local exit_code=$?
