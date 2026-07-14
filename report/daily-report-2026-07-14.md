@@ -1,48 +1,5 @@
-#!/bin/bash
-set -euo pipefail
-
-log_dir="${HOME}/.cache/daily-report"
-log_file="${log_dir}/errors.log"
-mkdir -p "$log_dir"
-
-on_error() {
-  local exit_code=$?
-  local line_no=${1:-unknown}
-  local cmd=${2:-unknown}
-  {
-    echo "[$(date -Iseconds)] ERROR exit=$exit_code line=$line_no cmd=$cmd"
-    echo "pwd=$PWD"
-    echo "branch=$(git branch --show-current 2>/dev/null || true)"
-    echo "commit=$(git rev-parse --short HEAD 2>/dev/null || true)"
-    echo "---"
-  } >> "$log_file"
-}
-
-trap 'on_error ${LINENO} "${BASH_COMMAND}"' ERR
-
-repo_root=$(git rev-parse --show-toplevel)
-formatted_date=$(date +"%B %-d, %Y")
-report_date=$(date +"%Y-%m-%d")
-
-# Format remote origin URL to https url
-remote_url=$(git config --get remote.origin.url || echo "")
-if [[ "$remote_url" =~ ^git@ ]]; then
-  temp=${remote_url#git@}
-  temp=${temp/:/\/}
-  repo_url="https://${temp%.git}"
-elif [[ "$remote_url" =~ ^https:// ]]; then
-  repo_url="${remote_url%.git}"
-else
-  # Fallback to the known remote repository for this workspace
-  repo_url="https://github.com/Dhan0115/AI-Automated_Payment-Reminder"
-fi
-
-report_file="$repo_root/report/daily-report-${report_date}.md"
-mkdir -p "$repo_root/report"
-
-cat > "$report_file" <<EOF
 Daily Progress Report: AI-Automated Payment Reminder
-Date: $formatted_date
+Date: July 14, 2026
 This report provides a summary of the improvements, newly added features, and code refactorings implemented in the AI-Automated Payment Reminder project. Over the past few sessions, we have completed the end-to-end integration of user-focused interaction actions, custom modal confirmations, voice-activated speech recognition capabilities, and robust parsing fallback routines.
 
 🚀 Key Accomplishments & Features
@@ -66,11 +23,4 @@ pages/index.vue
 * Integrated custom delete confirmation layout markup.
 * Refactored Tailwind layout definitions for v4 compilation.
 
-Link: $repo_url
-EOF
-
-
-
-
-
-
+Link: https://github.com/Dhan0115/AI-Automated_Payment-Reminder
