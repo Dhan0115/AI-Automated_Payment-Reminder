@@ -1,13 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
-
-# Prevent infinite recursion during git commit --amend
-if [ -z "${GIT_POST_COMMIT_AMENDING:-}" ]; then
-  export GIT_POST_COMMIT_AMENDING=1
-  repo_root=$(git rev-parse --show-toplevel)
-  report_date=$(date +"%Y-%m-%d")
-  "$repo_root/scripts/generate_report.sh"
-  git add -f "$repo_root/report/daily-report-${report_date}.md"
-  git commit --amend --no-edit --no-verify
-fi
+repo_root=$(git rev-parse --show-toplevel)
+"$repo_root/scripts/generate_report.sh"
