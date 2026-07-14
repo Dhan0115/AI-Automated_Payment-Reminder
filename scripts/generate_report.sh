@@ -1,57 +1,59 @@
 #!/bin/bash
+set -euo pipefail
 
-# Determine directory of this script to locate workspace root
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+log_dir="${HOME}/.cache/daily-report"
+log_file="${log_dir}/errors.log"
+mkdir -p "$log_dir"
 
-# Define report configuration variables
-REPORT_PATH="${REPORT_PATH:-$WORKSPACE_ROOT/report/daily-report.md}"
-PROJECT_NAME="${PROJECT_NAME:-AI-Automated Payment Reminder}"
-REPORT_DATE="${REPORT_DATE:-$(date +'%B %d, %Y')}"
+on_error() {
+  local exit_code=$?
+  local line_no=${1:-unknown}
+  local cmd=${2:-unknown}
+  {
+    echo "[$(date -Iseconds)] ERROR exit=$exit_code line=$line_no cmd=$cmd"
+    echo "pwd=$PWD"
+    echo "branch=$(git branch --show-current 2>/dev/null || true)"
+    echo "commit=$(git rev-parse --short HEAD 2>/dev/null || true)"
+    echo "---"
+  } >> "$log_file"
+}
 
-# Summary of changes
-SUMMARY="This report provides a summary of the improvements, newly added features, and code refactorings implemented in the AI-Automated Payment Reminder project. Over the past few sessions, we have completed the end-to-end integration of user-focused interaction actions, custom modal confirmations, voice-activated speech recognition capabilities, and robust parsing fallback routines."
+trap 'on_error ${LINENO} "${BASH_COMMAND}"' ERR
 
-# Key Accomplishments
-ACCOMPLISHMENTS="1. Edit and Delete Dashboards Controls
-* Dynamic Record Editing: Integrated an Edit action button next to each bill item in the main list. Clicking edit populates the form modal with the selected bill's active fields, permitting seamless updates.
-* Persistent Record IDs: Refined components/BillForm.vue to retain existing unique identifiers (prefill.id) during saving routines, preventing accidental duplicate listings or ID overwriting.
-* Intelligent Upsert Handler: Upgraded handleSaved(savedBill) inside the main page to automatically substitute updated details at the record's existing array index or append them if it is a brand-new item.
+repo_root=$(git rev-parse --show-toplevel)
+branch=$(git branch --show-current || true)
+commit=$(git rev-parse --short HEAD || true)
+author=$(git log -1 --format='%an' 2>/dev/null || git config user.name || echo "Unknown")
+date=$(date +"%B %-d, %Y (%A)")
 
-2. Sleek Custom Delete Confirmation Modal
-* Custom Alert Dialog: Substituted raw browser-native confirm() dialogs with a high-fidelity inline modal that matches the premium visual styling of the app.
-* Interactive Guardrail Warnings: Incorporates a prominent hazard-alert icon (⚠️) in soft red, clear context messages indicating the targeted bill's name, and balanced Cancel / Delete confirmation flows."
+# Format remote origin URL to https url
+remote_url=$(git config --get remote.origin.url || echo "")
+temp=${remote_url#git@}
+temp=${temp/:/\/}
+repo_url="https://${temp%.git}"
 
-# Detailed File Changes
-FILE_CHANGES="pages/index.vue
-* Added SpeechRecognition state parameters (isListening, isSpeechSupported, and recognition).
-* Implemented action columns in the bills table.
-* Added handlers: confirmDeleteBill(bill), executeDeleteBill(), closeDeleteConfirm(), editBill(bill).
-* Integrated custom delete confirmation layout markup.
-* Refactored Tailwind layout definitions for v4 compilation.
+# Dynamic summary from the last commit
+commit_subject=$(git log -1 --format="%s" 2>/dev/null || echo "No commits yet")
+commit_body=$(git log -1 --format="%b" 2>/dev/null || echo "")
 
-Link: [pages/index.vue](file://$WORKSPACE_ROOT/pages/index.vue)
+cat > daily-report.md <<EOF
+Daily Report
+Date: $(date +"%Y-%m-%d")
+Branch: $(git branch --show-current || echo detached-head)
+Commit: $(git rev-parse --short HEAD)
 
-components/BillForm.vue
-* Refined components/BillForm.vue to retain existing unique identifiers (prefill.id) during saving routines, preventing accidental duplicate listings or ID overwriting.
+Progress
+Generated from the current commit.
 
-Link: [components/BillForm.vue](file://$WORKSPACE_ROOT/components/BillForm.vue)"
+File Changes
+${diff_output:-No tracked file changes detected.}
 
-# Generate report content using the generic structure
-cat << EOF > "$REPORT_PATH"
-Daily Progress Report: $PROJECT_NAME
-Date: $REPORT_DATE
+Blockers
+None.
 
-$SUMMARY
-
-🚀 Key Accomplishments & Features
-
-$ACCOMPLISHMENTS
-
-🛠️ Detailed File Changes
-
-$FILE_CHANGES
+Next Steps
+Review tracked file changes.
 EOF
 
-chmod +x "$REPORT_PATH" 2>/dev/null || true
-echo "Daily report successfully generated at: $REPORT_PATH"
+
+

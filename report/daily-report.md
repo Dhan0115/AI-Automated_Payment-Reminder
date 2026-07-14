@@ -25,7 +25,13 @@ pages/index.vue
 
 Link: [pages/index.vue](file:///Users/dhan/Applications/AI-Automated_Payment-Reminder/pages/index.vue)
 
-components/BillForm.vue
-* Refined components/BillForm.vue to retain existing unique identifiers (prefill.id) during saving routines, preventing accidental duplicate listings or ID overwriting.
+scripts/generate_report.sh
+* Simplified script directory resolution (using dirname $0) to make it shell-agnostic (bash, zsh, and sh).
+* Added directory existence check (mkdir -p) before generating the report.
 
-Link: [components/BillForm.vue](file:///Users/dhan/Applications/AI-Automated_Payment-Reminder/components/BillForm.vue)
+Link: [generate_report.sh](file:///Users/dhan/Applications/AI-Automated_Payment-Reminder/scripts/generate_report.sh)
+
+package.json
+* Updated the npm report script to execute using zsh.
+
+Link: [package.json](file:///Users/dhan/Applications/AI-Automated_Payment-Reminder/package.json)
