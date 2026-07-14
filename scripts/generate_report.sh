@@ -3,7 +3,7 @@ set -euo pipefail
 
 log_dir="${HOME}/.cache/daily-report"
 log_file="${log_dir}/errors.log"
-mkdir -p "$log_dir"
+mkdir -p "$repo_root/report/daily-report.md"
 
 on_error() {
   local exit_code=$?
@@ -21,132 +21,66 @@ on_error() {
 trap 'on_error ${LINENO} "${BASH_COMMAND}"' ERR
 
 repo_root=$(git rev-parse --show-toplevel)
-formatted_date=$(date +"%B %-d, %Y (%A)")
-report_date=$(date +"%Y-%m-%d")
+branch=$(git branch --show-current || true)
+commit=$(git rev-parse --short HEAD || true)
+author=$(git log -1 --format='%an' 2>/dev/null || git config user.name || echo "Unknown")
+date=$(date +"%B %-d, %Y (%A)")
 
 # Format remote origin URL to https url
 remote_url=$(git config --get remote.origin.url || echo "")
-if [[ "$remote_url" =~ ^git@ ]]; then
-  temp=${remote_url#git@}
-  temp=${temp/:/\/}
-  repo_url="https://${temp%.git}"
-elif [[ "$remote_url" =~ ^https:// ]]; then
-  repo_url="${remote_url%.git}"
-else
-  # Fallback to the known remote repository for this workspace
-  repo_url="https://github.com/Dhan0115/AI-Automated_Payment-Reminder"
-fi
+temp=${remote_url#git@}
+temp=${temp/:/\/}
+repo_url="https://${temp%.git}"
 
-branch=$(git branch --show-current 2>/dev/null || echo "detached-head")
-commit=$(git rev-parse --short HEAD 2>/dev/null || echo "none")
+# Dynamic summary from the last commit
+commit_subject=$(git log -1 --format="%s" 2>/dev/null || echo "No commits yet")
+commit_body=$(git log -1 --format="%b" 2>/dev/null || echo "")
 
-# Find the first commit of today
-first_commit_today=$(git log --since="${report_date} 00:00:00" --reverse --format="%H" 2>/dev/null | head -n 1 || echo "")
+cat > "$repo_root/report/daily-report.md" <<EOF
+📋 Daily Progress Report
+Date: $date 
+Branch: $branch 
+Author: $author
 
-# Gather today's commits
-commits_today=""
-if [ -n "$first_commit_today" ]; then
-  while read -r hash; do
-    if [ -n "$hash" ]; then
-      subject=$(git show -s --format="%s" "$hash")
-      body=$(git show -s --format="%b" "$hash" | sed 's/^/  /')
-      commits_today="${commits_today}* **${subject}** (${hash})
-"
-      if [ -n "$body" ] && [ "$body" != "  " ]; then
-        commits_today="${commits_today}${body}
-"
-      fi
-    fi
-  done < <(git log --since="${report_date} 00:00:00" --reverse --format="%h" -- . ':!node_modules' ':!.nuxt' ':!package-lock.json')
-fi
+✅ Summary
+Today's work focused on: $commit_subject
+$( [ -n "$commit_body" ] && echo -e "\n$commit_body" || true )
 
-# Gather file changes today
-file_changes=""
-if [ -n "$first_commit_today" ]; then
-  # Determine comparison revision (parent of first commit of today)
-  if git rev-parse "${first_commit_today}~1" &>/dev/null; then
-    compare_rev="${first_commit_today}~1"
-  else
-    # Fallback to empty tree if there's no parent commit
-    compare_rev=$(git hash-object -t tree /dev/null)
-  fi
+EOF
 
-  while read -r diff_status file_path; do
-    # Strip double quotes from path if git outputs them
-    file_path=$(echo "$file_path" | sed -e 's/^"//' -e 's/"$//')
-    case "$diff_status" in
-      A) emoji="🟢" status_text="Added" ;;
-      M) emoji="🟡" status_text="Modified" ;;
-      D) emoji="🔴" status_text="Deleted" ;;
-      *) emoji="⚪" status_text="$diff_status" ;;
-    esac
-    file_name=$(basename "$file_path")
-    file_changes="${file_changes}* $emoji **$status_text**: [$file_name](file://$repo_root/$file_path)
-"
-  done < <(git diff --no-renames --name-status "$compare_rev" HEAD -- . ':!node_modules' ':!.nuxt' ':!package-lock.json' 2>/dev/null || echo "")
-fi
-
-# Gather uncommitted changes if any
-uncommitted_changes=""
-while IFS= read -r line; do
-  if [ -n "$line" ]; then
-    # status is the first 2 chars
-    diff_status="${line:0:2}"
-    diff_status=$(echo "$diff_status" | xargs) # trim spaces
-    file_path="${line:3}"
-    # Strip double quotes
-    file_path=$(echo "$file_path" | sed -e 's/^"//' -e 's/"$//')
-    case "$diff_status" in
-      A|??) emoji="🟢" status_text="Added (Uncommitted)" ;;
-      M)    emoji="🟡" status_text="Modified" ;;
-      D)    emoji="🔴" status_text="Deleted" ;;
-      *)    emoji="⚪" status_text="$diff_status" ;;
-    esac
-    file_name=$(basename "$file_path")
-    uncommitted_changes="${uncommitted_changes}* $emoji **$status_text**: [$file_name](file://$repo_root/$file_path)
-"
-  fi
-done < <(git status --porcelain -- . ':!node_modules' ':!.nuxt' ':!package-lock.json' 2>/dev/null || echo "")
-
-report_file="$repo_root/report/daily-report-${report_date}.md"
-mkdir -p "$repo_root/report"
-
-# Generate report content
+Append Detailed File Changes
 {
-  echo "Daily Progress Report Date: $formatted_date"
-  echo ""
-  echo "Branch: \`$branch\`"
-  echo "Latest Commit: \`$commit\`"
-  echo ""
-  echo "## 🚀 Today's Commits & Progress"
-  echo ""
-  if [ -n "$commits_today" ]; then
-    printf "%s" "$commits_today"
-  else
-    echo "No commits recorded for today yet."
-  fi
-  echo ""
-  
-  if [ -n "$uncommitted_changes" ]; then
-    echo "### ⏳ Uncommitted Changes"
-    echo ""
-    printf "%s" "$uncommitted_changes"
-    echo ""
-  fi
+  echo "🛠️ Detailed File Changes"
+  i=0
+  emojis=("1️⃣" "2️⃣" "3️⃣" "4️⃣" "5️⃣" "6️⃣" "7️⃣" "8️⃣" "9️⃣" "🔟")
 
-  echo "## 🛠️ Detailed File Changes"
-  echo ""
-  if [ -n "$file_changes" ]; then
-    printf "%s" "$file_changes"
-  else
-    echo "No files changed in today's commits."
-  fi
-  echo ""
-  echo "[Remote Repository]($repo_url)"
-} > "$report_file"
+  git diff-tree --no-commit-id --name-status -r HEAD 2>/dev/null | while read -r status filepath; do
+    emoji=${emojis[$i]}
+    if [ -z "$emoji" ]; then
+      emoji="👉"
+    fi
+
+    case "$status" in
+      M) status_str="Modified" ;;
+      A) status_str="Added" ;;
+      D) status_str="Deleted" ;;
+      R) status_str="Renamed" ;;
+      C) status_str="Copied" ;;
+      *) status_str="Updated" ;;
+    esac
+
+    printf "%s %s\t%s\n" "$emoji" "$filepath" "$status_str"
+    printf " 👉%s/-/blob/%s/%s?ref_type=heads\n\n" "$repo_url" "$branch" "$filepath"
+
+    i=$((i+1))
+  done
+} >> "$repo_root/report/daily-report.md"
 
 
+cat >> "$repo_root/report/daily-report.md" <<EOF
+🚀 Key Accomplishments & Features
+- make a detailed accomplishment and features 
+- task completed description
 
-
-
-
+EOF
+fi
