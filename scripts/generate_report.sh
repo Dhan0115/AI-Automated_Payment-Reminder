@@ -36,18 +36,28 @@ repo_url="https://${temp%.git}"
 commit_subject=$(git log -1 --format="%s" 2>/dev/null || echo "No commits yet")
 commit_body=$(git log -1 --format="%b" 2>/dev/null || echo "")
 
+# Get name status of modified files in the last commit
+diff_output=$(git diff-tree --no-commit-id --name-status -r HEAD 2>/dev/null | sed 's/^/* /' || echo "No tracked file changes detected.")
+if [ -z "$diff_output" ]; then
+  diff_output="No tracked file changes detected."
+fi
+
+report_date=$(date +"%Y-%m-%d")
+report_file="$repo_root/report/daily-report-${report_date}.md"
+
 mkdir -p "$repo_root/report"
-cat > "$repo_root/report/daily-report.md" <<EOF
+cat > "$report_file" <<EOF
 Daily Report
-Date: $(date +"%Y-%m-%d")
-Branch: $(git branch --show-current || echo detached-head)
-Commit: $(git rev-parse --short HEAD)
+Date: $report_date
+Branch: $branch
+Commit: $commit
 
 Progress
-Generated from the current commit.
+- $commit_subject
+${commit_body:+$commit_body}
 
 File Changes
-${diff_output:-No tracked file changes detected.}
+$diff_output
 
 Blockers
 None.
