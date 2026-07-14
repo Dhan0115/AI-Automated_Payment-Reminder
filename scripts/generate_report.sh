@@ -36,7 +36,8 @@ repo_url="https://${temp%.git}"
 commit_subject=$(git log -1 --format="%s" 2>/dev/null || echo "No commits yet")
 commit_body=$(git log -1 --format="%b" 2>/dev/null || echo "")
 
-cat > daily-report.md <<EOF
+mkdir -p "$repo_root/report"
+cat > "$repo_root/report/daily-report.md" <<EOF
 Daily Report
 Date: $(date +"%Y-%m-%d")
 Branch: $(git branch --show-current || echo detached-head)
