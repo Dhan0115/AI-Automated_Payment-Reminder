@@ -6,6 +6,6 @@
   },
   "scripts": {
     "dev": "nuxi dev",
-    "report": "./scripts/generate_report.sh"
+    "report": "bash ./scripts/generate_report.sh"
   }
 }
