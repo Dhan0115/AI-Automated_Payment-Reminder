@@ -3,3 +3,12 @@ set -euo pipefail
 
 repo_root=$(git rev-parse --show-toplevel)
 "$repo_root/scripts/generate_report.sh"
+
+# Prevent infinite recursion during git commit --amend
+if [ -z "${GIT_POST_COMMIT_AMENDING:-}" ]; then
+  export GIT_POST_COMMIT_AMENDING=1
+  repo_root=$(git rev-parse --show-toplevel)
+  "$repo_root/scripts/generate_report.sh"
+  git add "$repo_root/report/daily-report.md"
+  git commit --amend --no-edit --no-verify
+fi
