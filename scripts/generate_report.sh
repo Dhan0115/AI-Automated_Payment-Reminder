@@ -44,49 +44,47 @@ commit_body=$(git log -1 --format="%b" 2>/dev/null || echo "")
 
 cat > "$repo_root/report/daily-report.md" <<EOF
 📋 Daily Progress Report : AI-Automated_Payment-Reminder
-Date: $date 
+Date: $date
 
-
-
- 🔎 Summary
+ 🔎 Summary 
 Today's work focused on: $commit_subject
 $( [ -n "$commit_body" ] && echo -e "\n$commit_body" || true )
 
+Detailed File Changes ᝰ✍🏻 .ᐟ 
 EOF
 
 # Append Detailed File Changes
-{
-  echo "Detailed File Changes ᝰ✍🏻 .ᐟ "
-  i=0
-  emojis=("1️⃣" "2️⃣" "3️⃣" "4️⃣" "5️⃣" "6️⃣" "7️⃣" "8️⃣" "9️⃣" "🔟")
+git diff-tree --no-commit-id --name-status -r HEAD 2>/dev/null | while read -r status filepath; do
+  case "$status" in
+    M) status_str="MODIFIED" ;;
+    A) status_str="ADDED" ;;
+    D) status_str="REMOVED" ;;
+    R) status_str="RENAMED" ;;
+    *) status_str="MODIFIED" ;;
+  esac
 
-  git diff-tree --no-commit-id --name-status -r HEAD 2>/dev/null | while read -r status filepath; do
-    emoji=${emojis[$i]}
-    if [ -z "$emoji" ]; then
-      emoji="🔗"
-    fi
+  cat >> "$repo_root/report/daily-report.md" <<EOF
 
-    case "$status" in
-      M) status_str="Modified" ;;
-      A) status_str="Added" ;;
-      D) status_str="Deleted" ;;
-      R) status_str="Renamed" ;;
-      C) status_str="Copied" ;;
-      *) status_str="Updated" ;;
-    esac
-
-    printf "%s %s\t%s\n" "$emoji" "$filepath" "$status_str"
-    printf "🔗 %s/-/blob/%s/%s?ref_type=heads\n\n" "$repo_url" "$branch" "$filepath"
-
-    i=$((i+1))
-  done
-} >> "$repo_root/report/daily-report.md"
-
+**Change:** $status_str ($filepath)
+ 
+ ### What Changed
+{1–3 sentences describing exactly what was added, edited, or removed in $filepath. Be specific — name functions, sections, or features affected.}
+EOF
+done
 
 cat >> "$repo_root/report/daily-report.md" <<EOF
-🚀 Key Accomplishments & Features
-🗒 make a detailed accomplishment and features 
-🗒 task completed description
 
+
+**Name:** {Feature name}
+### What Was Built
+{1–2 sentences describing the feature and how it works.}
+
+**How It Works (User Flow)**
+1. {Step 1}
+2. {Step 2}
+3. {Step 3}
+
+
+**Links**
+* GitHub: 🔗 [Link]($repo_url)
 EOF
-
