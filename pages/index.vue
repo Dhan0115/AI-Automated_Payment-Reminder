@@ -246,7 +246,7 @@ function closeDeleteConfirm() {
 
     <div class="bg-white shadow-sm rounded-lg overflow-x-auto border">
       <table class="min-w-full text-sm whitespace-nowrap">
-        <thead class="bg-gray-100 border-b ">
+        <thead class="bg-gray-100 border-b">
           <tr class="text-left ">
             <th class="px-4 py-2 text-gray-600 font-medium">Name</th>
             <th class="px-4 py-2 text-gray-600 font-medium">Category</th>
