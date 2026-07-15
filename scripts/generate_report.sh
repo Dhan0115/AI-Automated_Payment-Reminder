@@ -28,36 +28,42 @@ date=$(date +"%B %-d, %Y (%A)")
 
 # Format remote origin URL to https url
 remote_url=$(git config --get remote.origin.url || echo "")
-temp=${remote_url#git@}
-temp=${temp/:/\/}
-repo_url="https://${temp%.git}"
+if [[ "$remote_url" =~ ^git@ ]]; then
+  temp=${remote_url#git@}
+  temp=${temp/:/\/}
+  repo_url="https://${temp%.git}"
+elif [[ "$remote_url" =~ ^https:// ]]; then
+  repo_url="${remote_url%.git}"
+else
+  repo_url="https://github.com/Dhan0115/AI-Automated_Payment-Reminder"
+fi
 
 # Dynamic summary from the last commit
 commit_subject=$(git log -1 --format="%s" 2>/dev/null || echo "No commits yet")
 commit_body=$(git log -1 --format="%b" 2>/dev/null || echo "")
 
 cat > "$repo_root/report/daily-report.md" <<EOF
-📋 Daily Progress Report
+📋 Daily Progress Report : AI-Automated_Payment-Reminder
 Date: $date 
-Branch: $branch 
-Author: $author
 
-✅ Summary
+
+
+ 🔎 Summary
 Today's work focused on: $commit_subject
 $( [ -n "$commit_body" ] && echo -e "\n$commit_body" || true )
 
 EOF
 
-Append Detailed File Changes
+# Append Detailed File Changes
 {
-  echo "🛠️ Detailed File Changes"
+  echo "Detailed File Changes ᝰ✍🏻 .ᐟ "
   i=0
   emojis=("1️⃣" "2️⃣" "3️⃣" "4️⃣" "5️⃣" "6️⃣" "7️⃣" "8️⃣" "9️⃣" "🔟")
 
   git diff-tree --no-commit-id --name-status -r HEAD 2>/dev/null | while read -r status filepath; do
     emoji=${emojis[$i]}
     if [ -z "$emoji" ]; then
-      emoji="👉"
+      emoji="🔗"
     fi
 
     case "$status" in
@@ -70,7 +76,7 @@ Append Detailed File Changes
     esac
 
     printf "%s %s\t%s\n" "$emoji" "$filepath" "$status_str"
-    printf " 👉%s/-/blob/%s/%s?ref_type=heads\n\n" "$repo_url" "$branch" "$filepath"
+    printf "🔗 %s/-/blob/%s/%s?ref_type=heads\n\n" "$repo_url" "$branch" "$filepath"
 
     i=$((i+1))
   done
@@ -79,8 +85,8 @@ Append Detailed File Changes
 
 cat >> "$repo_root/report/daily-report.md" <<EOF
 🚀 Key Accomplishments & Features
-- make a detailed accomplishment and features 
-- task completed description
+🗒 make a detailed accomplishment and features 
+🗒 task completed description
 
 EOF
-fi
+

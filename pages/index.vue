@@ -244,10 +244,10 @@ function closeDeleteConfirm() {
       </button>
     </div>
 
-    <div class="bg-white shadow-sm rounded-lg overflow-hidden border">
-      <table class="min-w-full text-sm">
-        <thead class="bg-gray-100 border-b">
-          <tr class="text-left">
+    <div class="bg-white shadow-sm rounded-lg overflow-x-auto border">
+      <table class="min-w-full text-sm whitespace-nowrap">
+        <thead class="bg-gray-100 border-b ">
+          <tr class="text-left ">
             <th class="px-4 py-2 text-gray-600 font-medium">Name</th>
             <th class="px-4 py-2 text-gray-600 font-medium">Category</th>
             <th class="px-4 py-2 text-gray-600 font-medium">Amount</th>
@@ -286,15 +286,15 @@ function closeDeleteConfirm() {
               <div class="flex items-center justify-center gap-2">
                 <button
                   @click="editBill(bill)"
-                  class="inline-flex items-center rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition-all duration-150 active:scale-95"
+                  class="inline-flex items-center rounded-md border h-7 border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition-all duration-150 active:scale-95 gap-2"
                 >
-                  ✏️ Edit
+                  <span>✏️</span> Edit
                 </button>
                 <button
                   @click="confirmDeleteBill(bill)"
-                  class="inline-flex items-center rounded-md border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 transition-all duration-150 active:scale-95"
+                  class="inline-flex items-center rounded-md border h-7 border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 transition-all duration-150 active:scale-95 gap-2"
                 >
-                  🗑️ Delete
+                  <span>🗑️</span> Delete
                 </button>
               </div>
             </td>
