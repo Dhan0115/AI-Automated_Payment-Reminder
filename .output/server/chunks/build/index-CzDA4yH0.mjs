@@ -1,0 +1,150 @@
+import { defineComponent, ref, mergeProps, reactive, watch, useSSRContext } from 'vue';
+import { ssrRenderAttrs, ssrRenderAttr, ssrIncludeBooleanAttr, ssrRenderClass, ssrInterpolate, ssrRenderList, ssrRenderComponent, ssrLooseContain } from 'vue/server-renderer';
+
+const _sfc_main$1 = /* @__PURE__ */ defineComponent({
+  __name: "BillForm",
+  __ssrInlineRender: true,
+  props: {
+    prefill: {
+      type: Object,
+      default: null
+    }
+  },
+  emits: ["saved", "cancel"],
+  setup(__props, { emit: __emit }) {
+    const props = __props;
+    const form = reactive({
+      name: "",
+      category: "",
+      amount: null,
+      dueDate: "",
+      daysBefore: 2,
+      email: "",
+      paid: false
+    });
+    function applyPrefill() {
+      if (props.prefill) {
+        form.name = props.prefill.name ?? "";
+        form.category = props.prefill.category ?? "";
+        form.amount = props.prefill.amount ?? null;
+        form.dueDate = props.prefill.dueDate ?? "";
+        form.daysBefore = props.prefill.daysBefore ?? 2;
+        form.email = props.prefill.email ?? "";
+        form.paid = props.prefill.paid ?? false;
+      }
+    }
+    watch(() => props.prefill, () => {
+      applyPrefill();
+    }, { deep: true, immediate: true });
+    const saving = ref(false);
+    return (_ctx, _push, _parent, _attrs) => {
+      _push(`<form${ssrRenderAttrs(mergeProps({ class: "space-y-3" }, _attrs))}><div><label class="block text-xs font-medium text-gray-700 mb-1"> Bill Name </label><input${ssrRenderAttr("value", form.name)} type="text" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Electricity"></div><div><label class="block text-xs font-medium text-gray-700 mb-1"> Category </label><input${ssrRenderAttr("value", form.category)} type="text" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Utilities, Rent, Loan…"></div><div class="flex gap-3"><div class="flex-1"><label class="block text-xs font-medium text-gray-700 mb-1"> Amount </label><input${ssrRenderAttr("value", form.amount)} type="number" min="0" step="0.01" class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="50"></div><div class="flex-1"><label class="block text-xs font-medium text-gray-700 mb-1"> Due Date </label><input${ssrRenderAttr("value", form.dueDate)} type="date" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"></div></div><div class="flex gap-3"><div class="flex-1"><label class="block text-xs font-medium text-gray-700 mb-1"> Days Before Reminder </label><input${ssrRenderAttr("value", form.daysBefore)} type="number" min="0" step="1" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"></div><div class="flex-1"><label class="block text-xs font-medium text-gray-700 mb-1"> Reminder Email </label><input${ssrRenderAttr("value", form.email)} type="email" required class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="you@example.com"></div></div><div class="flex items-center gap-2"><input id="paid"${ssrIncludeBooleanAttr(Array.isArray(form.paid) ? ssrLooseContain(form.paid, null) : form.paid) ? " checked" : ""} type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"><label for="paid" class="text-xs font-medium text-gray-700"> Mark as paid </label></div><div class="flex justify-end gap-2 pt-2"><button type="button" class="rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"> Cancel </button><button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-xs font-medium text-white hover:bg-indigo-700 disabled:bg-indigo-300"${ssrIncludeBooleanAttr(saving.value) ? " disabled" : ""}>${ssrInterpolate(saving.value ? "Saving..." : "Save")}</button></div></form>`);
+    };
+  }
+});
+const _sfc_setup$1 = _sfc_main$1.setup;
+_sfc_main$1.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("components/BillForm.vue");
+  return _sfc_setup$1 ? _sfc_setup$1(props, ctx) : void 0;
+};
+const __nuxt_component_0 = Object.assign(_sfc_main$1, { __name: "BillForm" });
+const _sfc_main = /* @__PURE__ */ defineComponent({
+  __name: "index",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const bills = ref([]);
+    const showNew = ref(false);
+    const aiPrompt = ref("");
+    const aiLoading = ref(false);
+    const aiError = ref("");
+    const aiPrefillData = ref(null);
+    const showDeleteConfirm = ref(false);
+    const billToDelete = ref(null);
+    const isSpeechSupported = ref(false);
+    const isListening = ref(false);
+    function handleSaved(savedBill) {
+      const index = bills.value.findIndex((b) => b.id === savedBill.id);
+      if (index !== -1) {
+        bills.value[index] = savedBill;
+      } else {
+        bills.value.push(savedBill);
+      }
+      showNew.value = false;
+      aiPrefillData.value = null;
+    }
+    function handleCancel() {
+      showNew.value = false;
+      aiPrefillData.value = null;
+    }
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_BillForm = __nuxt_component_0;
+      _push(`<section${ssrRenderAttrs(mergeProps({ class: "space-y-6 max-w-4xl mx-auto p-4" }, _attrs))}><div class="bg-linear-to-r from-violet-600 via-indigo-600 to-blue-600 rounded-2xl shadow-xl overflow-hidden p-6 text-white relative"><div class="absolute inset-0 bg-white/5 backdrop-blur-3xl -z-0"></div><div class="relative z-10 space-y-4"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="p-2 bg-white/20 rounded-lg animate-pulse text-lg flex items-center justify-center">✨</span><div><h1 class="text-xl font-bold tracking-tight flex items-center gap-1.5"> AI Smart Bill Assistant `);
+      if (isListening.value) {
+        _push(`<span class="inline-flex items-center gap-1 text-[10px] bg-red-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider animate-pulse"> ● Listening </span>`);
+      } else {
+        _push(`<!---->`);
+      }
+      _push(`</h1><p class="text-xs text-indigo-100">Add bills instantly by typing or speaking natural sentences</p></div></div></div><form class="flex gap-2"><div class="relative flex-1"><input${ssrRenderAttr("value", aiPrompt.value)} type="text" required${ssrIncludeBooleanAttr(aiLoading.value) ? " disabled" : ""} placeholder="e.g., Remind me to pay Netflix ₱598 on the 5th of every month using my card." class="w-full rounded-xl bg-white/10 border border-white/20 pl-4 pr-12 py-3 text-sm placeholder:text-indigo-200/70 focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/15 disabled:opacity-50 transition-all duration-200">`);
+      if (isSpeechSupported.value && !aiLoading.value) {
+        _push(`<button type="button" class="${ssrRenderClass([isListening.value ? "text-red-400 bg-red-500/20 ring-2 ring-red-500/50" : "text-indigo-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20", "absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all duration-200 flex items-center justify-center shadow-inner"])}" title="Speak your command">`);
+        if (isListening.value) {
+          _push(`<svg class="h-4 w-4 animate-bounce text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"></path><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"></path></svg>`);
+        } else {
+          _push(`<svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>`);
+        }
+        _push(`</button>`);
+      } else {
+        _push(`<!---->`);
+      }
+      if (aiLoading.value) {
+        _push(`<div class="absolute right-3 top-1/2 -translate-y-1/2"><svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>`);
+      } else {
+        _push(`<!---->`);
+      }
+      _push(`</div><button type="submit"${ssrIncludeBooleanAttr(aiLoading.value) ? " disabled" : ""} class="bg-white text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200 shadow-md flex items-center gap-1 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"><span>Analyze</span></button></form>`);
+      if (aiError.value) {
+        _push(`<div class="text-xs text-red-200 bg-red-900/30 border border-red-500/30 rounded-lg p-2 flex items-center gap-2"> ⚠️ ${ssrInterpolate(aiError.value)}</div>`);
+      } else {
+        _push(`<!---->`);
+      }
+      _push(`</div></div><div class="flex items-center justify-between border-b pb-2"><h2 class="text-lg font-semibold text-gray-800">Your Bills</h2><button class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"> Add Bill Manually </button></div><div class="bg-white shadow-sm rounded-lg overflow-x-auto border"><table class="min-w-full text-sm whitespace-nowrap"><thead class="bg-gray-100 border-b"><tr class="text-left"><th class="px-4 py-2 text-gray-600 font-medium">Name</th><th class="px-4 py-2 text-gray-600 font-medium">Category</th><th class="px-4 py-2 text-gray-600 font-medium">Amount</th><th class="px-4 py-2 text-gray-600 font-medium">Due Date</th><th class="px-4 py-2 text-gray-600 font-medium">Days Before</th><th class="px-4 py-2 text-gray-600 font-medium">Email</th><th class="px-4 py-2 text-gray-600 font-medium">Paid</th><th class="px-4 py-2 text-gray-600 font-medium text-center">Actions</th></tr></thead><tbody><!--[-->`);
+      ssrRenderList(bills.value, (bill) => {
+        _push(`<tr class="border-b last:border-0 hover:bg-gray-50/50 transition-colors"><td class="px-4 py-2 font-medium text-gray-900">${ssrInterpolate(bill.name)}</td><td class="px-4 py-2 text-gray-600">${ssrInterpolate(bill.category || "-")}</td><td class="px-4 py-2 text-gray-600">${ssrInterpolate(bill.amount != null ? "₱" + bill.amount : "-")}</td><td class="px-4 py-2 text-gray-600">${ssrInterpolate(bill.dueDate)}</td><td class="px-4 py-2 text-gray-600">${ssrInterpolate(bill.daysBefore)} days</td><td class="px-4 py-2 text-gray-600">${ssrInterpolate(bill.email)}</td><td class="px-4 py-2"><span class="${ssrRenderClass([bill.paid ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800", "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"])}">${ssrInterpolate(bill.paid ? "Yes" : "No")}</span></td><td class="px-4 py-2"><div class="flex items-center justify-center gap-2"><button class="inline-flex items-center rounded-md border h-7 border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition-all duration-150 active:scale-95 gap-2"><span>✏️</span> Edit </button><button class="inline-flex items-center rounded-md border h-7 border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 transition-all duration-150 active:scale-95 gap-2"><span>🗑️</span> Delete </button></div></td></tr>`);
+      });
+      _push(`<!--]-->`);
+      if (!bills.value.length) {
+        _push(`<tr><td class="px-4 py-4 text-center text-gray-500" colspan="8"> No bills yet. Try typing something above to smart-add! </td></tr>`);
+      } else {
+        _push(`<!---->`);
+      }
+      _push(`</tbody></table></div>`);
+      if (showNew.value) {
+        _push(`<div class="fixed inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm"><div class="bg-white rounded-lg shadow-lg max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-150"><div class="flex justify-between items-center mb-4"><h3 class="text-base font-bold text-gray-900 flex items-center gap-1.5"><span>${ssrInterpolate(aiPrefillData.value && aiPrefillData.value.id ? "✏️ Edit Bill Details" : aiPrefillData.value ? "✨ AI Pre-filled Bill" : "Add New Bill")}</span></h3><button class="text-gray-400 hover:text-gray-600 transition-colors"> ✕ </button></div>`);
+        _push(ssrRenderComponent(_component_BillForm, {
+          prefill: aiPrefillData.value,
+          onSaved: handleSaved,
+          onCancel: handleCancel
+        }, null, _parent));
+        _push(`</div></div>`);
+      } else {
+        _push(`<!---->`);
+      }
+      if (showDeleteConfirm.value) {
+        _push(`<div class="fixed inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"><div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-150 text-center border"><div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4 text-red-600"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg></div><h3 class="text-lg font-bold text-gray-950 mb-2">Delete Bill?</h3><p class="text-sm text-gray-500 mb-6"> Are you sure you want to delete <span class="font-semibold text-gray-800">&quot;${ssrInterpolate(billToDelete.value?.name)}&quot;</span>? This action cannot be undone. </p><div class="flex justify-center gap-3"><button class="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 active:scale-95 transition-all duration-150 flex-1"> Cancel </button><button class="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-red-700 active:scale-95 transition-all duration-150 flex-1"> Delete </button></div></div></div>`);
+      } else {
+        _push(`<!---->`);
+      }
+      _push(`</section>`);
+    };
+  }
+});
+const _sfc_setup = _sfc_main.setup;
+_sfc_main.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("pages/index.vue");
+  return _sfc_setup ? _sfc_setup(props, ctx) : void 0;
+};
+
+export { _sfc_main as default };
+//# sourceMappingURL=index-CzDA4yH0.mjs.map
