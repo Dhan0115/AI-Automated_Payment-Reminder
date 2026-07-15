@@ -38,19 +38,44 @@ else
   repo_url="https://github.com/Dhan0115/AI-Automated_Payment-Reminder"
 fi
 
+determine_type() {
+  local filepath="$1"
+  if [[ "$filepath" =~ ^components/ ]]; then
+    echo "Component"
+  elif [[ "$filepath" =~ ^pages/ ]]; then
+    echo "Page"
+  elif [[ "$filepath" =~ ^server/ ]]; then
+    echo "API Route"
+  elif [[ "$filepath" =~ ^(nuxt\.config\.ts|package\.json|package-lock\.json|tsconfig\.json|\.env|\.gitignore|\.vscode/) || "$filepath" =~ ^\.[a-zA-Z0-9_-]+$ ]]; then
+    echo "Config"
+  elif [[ "$filepath" =~ \.(css|scss|sass|less)$ ]]; then
+    echo "Style"
+  elif [[ "$filepath" =~ \.md$ ]]; then
+    echo "Docs"
+  elif [[ "$filepath" =~ ^(asset/|assets/|public/) ]]; then
+    echo "Asset"
+  else
+    echo "Other"
+  fi
+}
+
 # Dynamic summary from the last commit
 commit_subject=$(git log -1 --format="%s" 2>/dev/null || echo "No commits yet")
 commit_body=$(git log -1 --format="%b" 2>/dev/null || echo "")
 
-cat > "$repo_root/report/daily-report.md" <<EOF
-📋 Daily Progress Report : AI-Automated_Payment-Reminder
+repo_name=$(basename "$repo_root")
+tmp_report=$(mktemp)
+mkdir -p "$repo_root/report"
+
+cat > "$tmp_report" <<EOF
+📋 Daily Progress Report : $repo_name
 Date: $date
 
- 🔎 Summary 
+🔎 Summary
 Today's work focused on: $commit_subject
 $( [ -n "$commit_body" ] && echo -e "\n$commit_body" || true )
 
-Detailed File Changes ᝰ✍🏻 .ᐟ 
+Detailed File Changes
 EOF
 
 # Append Detailed File Changes
@@ -63,28 +88,27 @@ git diff-tree --no-commit-id --name-status -r HEAD 2>/dev/null | while read -r s
     *) status_str="MODIFIED" ;;
   esac
 
-  cat >> "$repo_root/report/daily-report.md" <<EOF
+  type_str=$(determine_type "$filepath")
 
-**Change:** $status_str ($filepath)
- 
- ### What Changed
-{1–3 sentences describing exactly what was added, edited, or removed in $filepath. Be specific — name functions, sections, or features affected.}
+  cat >> "$tmp_report" <<EOF
+
+🛠️ Change: $status_str
+✨ Type: $type_str
+📁 File: $filepath
+[1–3 sentences describing exactly what was added, edited, or removed. Be specific — name functions, sections, or features affected.]
 EOF
 done
 
-cat >> "$repo_root/report/daily-report.md" <<EOF
-
-
-**Name:** {Feature name}
-### What Was Built
-{1–2 sentences describing the feature and how it works.}
-
-**How It Works (User Flow)**
-1. {Step 1}
-2. {Step 2}
-3. {Step 3}
-
+cat >> "$tmp_report" <<EOF
 
 **Links**
-* GitHub: 🔗 [Link]($repo_url)
+
+- GitHub: 🔗 [Link]($repo_url)
 EOF
+
+if [ -f "$repo_root/daily-report.md" ] && [ -s "$repo_root/daily-report.md" ]; then
+  echo -e "\n\n---\n\n" >> "$tmp_report"
+  cat "$repo_root/daily-report.md" >> "$tmp_report"
+fi
+
+mv "$tmp_report" "$repo_root/daily-report.md"
