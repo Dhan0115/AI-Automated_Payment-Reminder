@@ -18,8 +18,118 @@ const isSpeechSupported = ref(false)
 const isListening = ref(false)
 let recognition: any = null
 
-// Later you’ll replace this with API calls
+const notificationPermission = ref('default')
+
+function updateNotificationPermission() {
+  if (typeof window !== 'undefined' && 'Notification' in window) {
+    notificationPermission.value = Notification.permission
+  }
+}
+
+async function requestNotificationPermission() {
+  if (typeof window === 'undefined' || !('Notification' in window)) {
+    alert("This browser does not support desktop notifications.")
+    return
+  }
+  const permission = await Notification.requestPermission()
+  notificationPermission.value = permission
+  if (permission === 'granted') {
+    new Notification("Notifications Enabled", {
+      body: "You will receive desktop alerts when your bills are coming due!",
+    })
+    checkDueDatesAndNotify()
+  }
+}
+
+function checkDueDatesAndNotify() {
+  if (typeof window === 'undefined' || !('Notification' in window) || Notification.permission !== 'granted') {
+    return
+  }
+
+  const todayStr = new Date().toISOString().split('T')[0]
+  const today = new Date(todayStr)
+  
+  const notifiedStore = localStorage.getItem('payment_reminder_notified_bills')
+  let notifiedMap: Record<string, string> = {}
+  if (notifiedStore) {
+    try {
+      notifiedMap = JSON.parse(notifiedStore)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  for (const id in notifiedMap) {
+    if (notifiedMap[id] !== todayStr) {
+      delete notifiedMap[id]
+    }
+  }
+
+  let updatedNotified = false
+
+  bills.value.forEach((bill) => {
+    if (bill.paid) return
+    if (notifiedMap[bill.id] === todayStr) return
+
+    const dueDate = new Date(bill.dueDate)
+    if (isNaN(dueDate.getTime())) return
+
+    const diffTime = dueDate.getTime() - today.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+    let shouldNotify = false
+    let title = ""
+    let body = ""
+
+    if (diffDays === 0) {
+      shouldNotify = true
+      title = `🚨 Bill Due Today: ${bill.name}`
+      body = `Your bill for ₱${bill.amount} is due today! Please ensure payment is sent to ${bill.email}.`
+    } else if (diffDays > 0 && diffDays <= bill.daysBefore) {
+      shouldNotify = true
+      title = `📅 Bill Coming Due: ${bill.name}`
+      body = `Your bill for ₱${bill.amount} is due in ${diffDays} day${diffDays > 1 ? 's' : ''} (on ${bill.dueDate}).`
+    } else if (diffDays < 0) {
+      shouldNotify = true
+      title = `⚠️ Overdue Bill: ${bill.name}`
+      body = `Your bill for ₱${bill.amount} is overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) > 1 ? 's' : ''} (due on ${bill.dueDate}).`
+    }
+
+    if (shouldNotify) {
+      new Notification(title, {
+        body,
+        tag: `bill-reminder-${bill.id}`,
+        requireInteraction: true
+      })
+      notifiedMap[bill.id] = todayStr
+      updatedNotified = true
+    }
+  })
+
+  if (updatedNotified) {
+    localStorage.setItem('payment_reminder_notified_bills', JSON.stringify(notifiedMap))
+  }
+}
+
+function saveBills() {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('payment_reminder_bills', JSON.stringify(bills.value))
+  }
+}
+
 function loadBills() {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('payment_reminder_bills')
+    if (saved) {
+      try {
+        bills.value = JSON.parse(saved)
+        return
+      } catch (e) {
+        console.error("Failed to parse saved bills", e)
+      }
+    }
+  }
+  
   bills.value = [
     {
       id: 1,
@@ -32,10 +142,15 @@ function loadBills() {
       paid: false,
     },
   ]
+  saveBills()
 }
 
 onMounted(() => {
   loadBills()
+  updateNotificationPermission()
+  if (notificationPermission.value === 'granted') {
+    checkDueDatesAndNotify()
+  }
   
   // Initialize Web Speech API for Speak AI Assistant
   const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
@@ -119,8 +234,10 @@ function handleSaved(savedBill: any) {
   } else {
     bills.value.push(savedBill)
   }
+  saveBills()
   showNew.value = false
   aiPrefillData.value = null
+  checkDueDatesAndNotify()
 }
 
 function handleCancel() {
@@ -148,6 +265,7 @@ function confirmDeleteBill(bill: any) {
 function executeDeleteBill() {
   if (billToDelete.value) {
     bills.value = bills.value.filter(b => b.id !== billToDelete.value.id)
+    saveBills()
   }
   closeDeleteConfirm()
 }
@@ -235,7 +353,34 @@ function closeDeleteConfirm() {
 
     <!-- Dashboard Title / Actions -->
     <div class="flex items-center justify-between border-b pb-2">
-      <h2 class="text-lg font-semibold text-gray-800">Your Bills</h2>
+      <div class="flex items-center gap-3">
+        <h2 class="text-lg font-semibold text-gray-800">Your Bills</h2>
+        
+        <!-- Premium Notification Status Badge -->
+        <button
+          v-if="notificationPermission === 'default'"
+          @click="requestNotificationPermission"
+          class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-all duration-200 active:scale-95 cursor-pointer shadow-xs"
+          title="Click to enable desktop notifications"
+        >
+          <span>🔔</span> Enable Alerts
+        </button>
+        <span
+          v-else-if="notificationPermission === 'granted'"
+          class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-green-50 text-green-700 border border-green-200 shadow-xs"
+          title="Desktop notifications are enabled"
+        >
+          <span>✨</span> Alerts Enabled
+        </span>
+        <button
+          v-else
+          @click="requestNotificationPermission"
+          class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all duration-200 active:scale-95 cursor-pointer shadow-xs"
+          title="Notifications blocked. Click to retry or check browser settings."
+        >
+          <span>🔕</span> Alerts Blocked
+        </button>
+      </div>
       <button
         class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
         @click="openManualAdd"
