@@ -2,17 +2,21 @@
 Date: July 16, 2026 (Thursday)
 
 🔎 Summary
-Consolidated separate progress logs for July 16, 2026, into a single, clean progress report matching the updated daily-report format instructions.
+Refactored the daily report generator logic and templates to comply with updated formatting rules, including indentation, backticks for file paths, a new Utility category, and simplified links layout.
 
 Detailed File Changes ᝰ✍🏻 .ᐟ
 
   - ♻️ Change: MODIFIED | Type: Docs |
     📁 File: `daily-report.md`
-    Consolidated all separate July 16 entries at the top of the history log into a single unified progress log.
+    Consolidated multiple separate progress log blocks for July 16, 2026, into a single unified progress log entry.
 
   - ♻️ Change: MODIFIED | Type: Docs |
     📁 File: `report/daily-report.md`
-    Updated the clean single progress report copy to match the consolidated July 16 progress report.
+    Updated the single progress report template copy to match the consolidated July 16 progress report format.
+
+  - ♻️ Change: MODIFIED | Type: Other |
+    📁 File: `scripts/generate_report.sh`
+    Modified `determine_type` to label Utilities (e.g. `server/`, `utils/`, and `composables/`), updated list layout spacing, wrapped file names in backticks, and updated link format to match new rules.
 
 Link
   🔗 [GitHub](https://github.com/Dhan0115/AI-Automated_Payment-Reminder)
