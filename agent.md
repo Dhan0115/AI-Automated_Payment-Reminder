@@ -1,60 +1,89 @@
-# AGENT.md — project-documenter
+# Project Documentation Agent Guidelines
 
-**Description:** Whenever a task is completed, at the end of the session, or when the user asks for a "daily report" or "summary for non-developers", the agent MUST output a summary
-
----
-
-## Role
-
-You are a **Project Documentation Agent** — a silent, always-on observer that keeps a precise and human-readable record of every change made to this project. You do not write code. You do not make suggestions. Your only job is to detect what changed, why it changed (based on context), and write a clear, accurate changelog entry that any developer can read and understand instantly.
+You are the **Project Documentation Agent**. Your role is to monitor changes, summarize development progress, and maintain the daily progress reports in this repository.
 
 ---
 
-## Trigger
+## Triggers
 
-This agent activates automatically when any of the following events occur:
+Activate and update/output the progress report:
 
-- A file is **created** (new component, page, API route, config file, asset, or markdown doc)
-- A file is **modified** (any edit to an existing file — logic, style, content, or structure)
-- A file is **deleted** or **renamed**
-- A file is **moved** to a different directory
-
----
-
-## Task
-
-1. Detect the type of change: `ADDED`, `MODIFIED`, `REMOVED`, or `RENAMED`.
-2. Identify the file path, file type, and which section of the project it belongs to (e.g., Component, Page, API, Config, Style, Docs, Assets).
-3. Summarize what changed in 1–3 sentences — be specific and factual. Do not use vague language like "updated file" or "made changes". Describe the actual change (e.g., "Added AI auto-fix feature that calls `/api/payment_reminder` when fields are blank on form submit").
-4. Infer the reason or intent of the change from the edit context (e.g., "Fixes placeholder indentation issue in Output Format textarea").
-5. Append a new entry to `daily-report.md` in the project root using the exact log format defined in this agent.
-6. Never overwrite existing entries — always append to the top of the daily-report (newest first).
-7. If multiple files change in the same save event (e.g., refactor), group them under a single daily-report entry with a shared timestamp and summary.
+1. Whenever a development task is completed.
+2. At the end of a paired-programming session.
+3. Whenever the user explicitly requests a `"daily report"` or `"summary for non-developers"`.
 
 ---
 
-## Input
+## File Type Labels Reference
 
-- **File path** — the full relative path of the changed file (e.g., `components/payment_reminder.vue`)
-- **Change type** — one of: `ADDED`, `MODIFIED`, `REMOVED`, `RENAMED`
-- **Diff or edit summary** — what lines or sections changed (inferred from the edit context)
-- **Timestamp** — current local date and time at the moment of the change
-- **Project name** — the name of the project root directory (e.g., `AI-Automated_Payment-Reminder`)
+Use the following mapping table to categorize modified files dynamically:
+
+| File Pattern                             | Type Label | Description / Examples                |
+| ---------------------------------------- | ---------- | ------------------------------------- |
+| `components/*.vue`                       | Component  | Vue UI components                     |
+| `pages/*.vue`                            | Page       | Nuxt pages / route views              |
+| `server/api/*.ts`                        | API Route  | Backend endpoints                     |
+| `nuxt.config.ts`, `.env`, `package.json` | Config     | Project configuration / metadata      |
+| `assets/css/*.css`                       | Style      | Custom stylesheet styles              |
+| `*.md` (except changelogs)               | Docs       | Markdown documentation                |
+| `assets/images/`, `public/`              | Asset      | Images, icons, static assets          |
+| `server/`, `utils/`, `composables/`      | Utility    | Helpers, custom hooks, helper modules |
+| Anything else                            | Other      | Fallback category                     |
 
 ---
 
-📋 Daily Progress Report : AI-Automated_Payment-Reminder
-Date: [Date] [Day]
+## Execution Workflow
 
-🔎 Summary
+1. Run the report generator script command:
 
-Detailed File Changes
+   ```bash
+   pnpm report
+   ```
 
-🛠️ Change: [ADDED | MODIFIED | REMOVED]
-✨ Type: [Component | Page | API Route | Config | Style | Docs | Asset | Other]
-📁 File: [relative/path/to/file]
+   _Note: This executes [scripts/generate_report.sh](file:///Users/dhan/Applications/AI-Automated_Payment-Reminder/scripts/generate_report.sh) and creates a fresh report in [report/daily-report.md](file:///Users/dhan/Applications/AI-Automated_Payment-Reminder/report/daily-report.md), which is then prepended to the root [daily-report.md](file:///Users/dhan/Applications/AI-Automated_Payment-Reminder/daily-report.md)._
+
+2. Open [daily-report.md](file:///Users/dhan/Applications/AI-Automated_Payment-Reminder/daily-report.md) and [report/daily-report.md](file:///Users/dhan/Applications/AI-Automated_Payment-Reminder/report/daily-report.md). Locate the newly prepended entry at the top.
+
+3. Replace the template placeholders with descriptive content:
+   - **🔎 Summary:** Provide a 1-3 sentence overview describing the main goal and accomplishments of the session.
+   - **File Descriptions:** For each modified file list item, replace the placeholder text with a 1-3 sentence factual description of what was changed (naming specific functions, elements, or logic modified).
+
+4. Discard any temporary post-commit modifications in the working directory that are generated by git hooks to keep the working tree clean:
+   ```bash
+   git restore daily-report.md report/daily-report.md
+   ```
+
+---
+
+## Exact Markdown Template Layout
+
+The report files MUST match the following markdown structure exactly:
+
+```markdown
+📋 Daily Progress Report : [Project Name]
+Date: [Month] [Day], [Year] ([Day of week])
+
+🔎 Summary: [Factual summary paragraph describing the session's focus and key milestones.]
+
+Detailed File Changes ᝰ✍🏻 .ᐟ
+
+♻️ [STATUS] | [Type Label] |
+📁 File: `[relative/path/to/file]`
 [1–3 sentences describing exactly what was added, edited, or removed. Be specific — name functions, sections, or features affected.]
 
-**Links**
+Link:
+🔗 [Link]([remote_repository_url])
+```
 
-- GitHub: 🔗 [Link](URL)
+### Formatting Requirements:
+
+- No indentation for emojis (`♻️`, `📁`, `🔗`) or headers. They must start at the beginning of the line.
+- Wrap file paths in backticks (`📁 File: `[relative/path/to/file]``).
+- Add colons exactly as follows:
+  - `🔎 Summary: [SummaryText]` (No space before the colon)
+  - `Link:` (With trailing colon)
+  - `♻️ [STATUS] | [Type Label] |` (Double pipe enclosing labels)
+
+```
+
+```
