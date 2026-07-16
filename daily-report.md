@@ -1,29 +1,32 @@
 📋 Daily Progress Report : AI-Automated_Payment-Reminder
 Date: July 16, 2026 (Thursday)
 
-🔎 Summary Implemented local storage persistence to retain added bills, and integrated HTML5 desktop notifications to alert users when a bill is approaching its due date or is overdue, including a status management badge in the UI. Also enabled tracking and version control for the daily progress report logs so they are synced to GitHub.
+🔎 Summary Implemented local storage persistence to retain added bills, and integrated HTML5 desktop notifications to alert users when a bill is approaching its due date or is overdue, including a status management badge in the UI. Also enabled tracking and version control for the daily progress report logs, and updated formatting rules for progress logs.
 
 Detailed File Changes ᝰ✍🏻 .ᐟ
 
-♻️ MODIFIED | Page |
-📁 pages/index.vue
-Added local storage serialization functions (loadBills, saveBills) to persist bills on page reload. Integrated the HTML5 Notifications API to prompt for permissions and run due date checks, and added a premium control badge in the heading displaying permission states.
+  ♻️ MODIFIED | Page |
+  📁 File: `pages/index.vue`
+  Added local storage serialization functions (loadBills, saveBills) to persist bills on page reload. Integrated the HTML5 Notifications API to prompt for permissions and run due date checks, and added a premium control badge in the heading displaying permission states.
 
-♻️ MODIFIED | Config |
-📁 .gitignore
-Updated configuration to stop ignoring daily-report.md files so they can be committed and shared on GitHub.
+  ♻️ MODIFIED | Utility |
+  📁 File: `scripts/generate_report.sh`
+  Refactored the automated daily report generator script to fix output redirection bugs, categorize other files as Utility, wrap file paths in backticks, adjust list indentation, and update link formatting.
 
-♻️ ADDED | Docs |
-📁 daily-report.md
-Added the cumulative project daily progress report history to version control.
+  ♻️ MODIFIED | Config |
+  📁 File: `.gitignore`
+  Updated configuration to allow tracking and version control of daily report markdown files.
 
-♻️ ADDED | Docs |
-📁 report/daily-report.md
-Added the single-day project progress report to version control.
+  ♻️ ADDED | Docs |
+  📁 File: `daily-report.md`
+  Added the cumulative project daily progress report history to version control.
 
-🔗 Links
+  ♻️ ADDED | Docs |
+  📁 File: `report/daily-report.md`
+  Added the single-day project progress report to version control.
 
-GitHub Repository: Dhan0115/AI-Automated_Payment-Reminder
+Link
+  🔗 [Link](https://github.com/Dhan0115/AI-Automated_Payment-Reminder)
 
 ---
 
@@ -35,17 +38,16 @@ Refactored the daily report generation pipeline by resolving redirection bugs in
 
 Detailed File Changes ᝰ✍🏻 .ᐟ
 
-♻️ MODIFIED | Other |
-📁 scripts/generate_report.sh
-Updated the redirection logic in the script so that the full daily report is compiled in a temporary file, copied to the report directory, and correctly prepended to the root daily-report.md without layout fragmentation.
+  ♻️ MODIFIED | Utility |
+  📁 File: `scripts/generate_report.sh`
+  Updated the redirection logic in the script so that the full daily report is compiled in a temporary file, copied to the report directory, and correctly prepended to the root daily-report.md without layout fragmentation.
 
-♻️ REMOVED | Other |
-📁 test.sh
-Removed the redundant shell script test runner as it is now replaced by the pnpm report command.
+  ♻️ REMOVED | Other |
+  📁 File: `test.sh`
+  Removed the redundant shell script test runner as it is now replaced by the pnpm report command.
 
-🔗 Links
-
-GitHub Repository: Dhan0115/AI-Automated_Payment-Reminder
+Link
+  🔗 [Link](https://github.com/Dhan0115/AI-Automated_Payment-Reminder)
 
 ---
 
@@ -57,26 +59,25 @@ Configured the automated daily report generation system to output clean, prepend
 
 Detailed File Changes ᝰ✍🏻 .ᐟ
 
-♻️ MODIFIED | Config |
-📁 .gitignore
-Added daily-report.md to the gitignore configuration to ensure the generated project reports are not tracked by version control.
+  ♻️ MODIFIED | Config |
+  📁 File: `.gitignore`
+  Added daily-report.md to the gitignore configuration to ensure the generated project reports are not tracked by version control.
 
-♻️ ADDED | Docs |
-📁 agent.md
-Created the project documenter agent guidelines file detailing triggers, role expectations, and the exact daily report markdown format.
+  ♻️ ADDED | Docs |
+  📁 File: `agent.md`
+  Created the project documenter agent guidelines file detailing triggers, role expectations, and the exact daily report markdown format.
 
-♻️ REMOVED | Docs |
-📁 format.md
-Removed the old format guidelines file as its contents have been updated and replaced by agent.md.
+  ♻️ REMOVED | Docs |
+  📁 File: `format.md`
+  Removed the old format guidelines file as its contents have been updated and replaced by agent.md.
 
-♻️ MODIFIED | Other |
-📁 scripts/generate_report.sh
-Rewrote the bash report generator to categorize modified files dynamically by type, output according to the template layout, and prepend new reports to the top of daily-report.md.
+  ♻️ MODIFIED | Other |
+  📁 File: `scripts/generate_report.sh`
+  Rewrote the bash report generator to categorize modified files dynamically by type, output according to the template layout, and prepend new reports to the top of daily-report.md.
 
-♻️ MODIFIED | Other |
-📁 test.sh
-Corrected all syntax errors, removed directory creation bugs, and turned the file into a clean executor wrapper that triggers the generator script.
+  ♻️ MODIFIED | Other |
+  📁 File: `test.sh`
+  Corrected all syntax errors, removed directory creation bugs, and turned the file into a clean executor wrapper that triggers the generator script.
 
-🔗 Links
-
-GitHub Repository: Dhan0115/AI-Automated_Payment-Reminder
+Link
+  🔗 [Link](https://github.com/Dhan0115/AI-Automated_Payment-Reminder)

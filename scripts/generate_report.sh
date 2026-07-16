@@ -94,9 +94,9 @@ git diff-tree --no-commit-id --name-status -r HEAD 2>/dev/null | while read -r s
 
   cat >> "$tmp_report" <<EOF
 
-  - ♻️ Change: $status_str | Type: $type_str |
-    📁 File: \`$filepath\`
-    [1–3 sentences describing exactly what was added, edited, or removed. Be specific — name functions, sections, or features affected.]
+  ♻️ $status_str | $type_str |
+  📁 File: \`$filepath\`
+  [1–3 sentences describing exactly what was added, edited, or removed. Be specific — name functions, sections, or features affected.]
 EOF
 done
 
@@ -104,7 +104,7 @@ cat >> "$tmp_report" <<EOF
 
 
 Link
-  🔗 [GitHub]($repo_url)
+  🔗 [Link]($repo_url)
 EOF
 
 # Copy the fresh daily report to report/daily-report.md
