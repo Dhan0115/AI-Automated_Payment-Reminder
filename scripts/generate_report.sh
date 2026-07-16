@@ -75,7 +75,7 @@ Date: $date
 Today's work focused on: $commit_subject
 $( [ -n "$commit_body" ] && echo -e "\n$commit_body" || true )
 
-Detailed File Changes
+Detailed File Changes ᝰ✍🏻 .ᐟ
 EOF
 
 # Append Detailed File Changes
@@ -92,8 +92,8 @@ git diff-tree --no-commit-id --name-status -r HEAD 2>/dev/null | while read -r s
 
   cat >> "$tmp_report" <<EOF
 
-🛠️ Change: $status_str
-✨ Type: $type_str
+♻️ Change: $status_str
+📄 Type: $type_str
 📁 File: $filepath
 [1–3 sentences describing exactly what was added, edited, or removed. Be specific — name functions, sections, or features affected.]
 EOF
@@ -101,10 +101,12 @@ done
 
 cat >> "$tmp_report" <<EOF
 
-**Links**
 
 - GitHub: 🔗 [Link]($repo_url)
 EOF
+
+# Copy the fresh daily report to report/daily-report.md
+cp "$tmp_report" "$repo_root/report/daily-report.md"
 
 if [ -f "$repo_root/daily-report.md" ] && [ -s "$repo_root/daily-report.md" ]; then
   echo -e "\n\n---\n\n" >> "$tmp_report"
@@ -112,3 +114,4 @@ if [ -f "$repo_root/daily-report.md" ] && [ -s "$repo_root/daily-report.md" ]; t
 fi
 
 mv "$tmp_report" "$repo_root/daily-report.md"
+
