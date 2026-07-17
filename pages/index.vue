@@ -280,7 +280,7 @@ function closeDeleteConfirm() {
 <template>
   <section class="space-y-6 max-w-4xl mx-auto p-4">
     <!-- Premium AI Assistant Card -->
-    <div class="bg-linear-to-r from-violet-600 via-indigo-600 to-blue-600 rounded-2xl shadow-xl overflow-hidden p-6 text-white relative">
+    <div class="bg-linear-to-r from-indigo-600 via-violet-600 to-purple-600 rounded-2xl shadow-xl overflow-hidden p-6 text-white relative">
       <div class="absolute inset-0 bg-white/5 backdrop-blur-3xl -z-0"></div>
       <div class="relative z-10 space-y-4">
         <div class="flex items-center justify-between">
@@ -352,7 +352,7 @@ function closeDeleteConfirm() {
     </div>
 
     <!-- Dashboard Title / Actions -->
-    <div class="flex items-center justify-between border-b pb-2">
+    <div class="flex items-center justify-between border-b border-slate-300 pb-2">
       <div class="flex items-center gap-3">
         <h2 class="text-lg font-semibold text-gray-800">Your Bills</h2>
         
@@ -389,25 +389,25 @@ function closeDeleteConfirm() {
       </button>
     </div>
 
-    <div class="bg-white shadow-sm rounded-lg overflow-x-auto border">
+    <div class="bg-white/60 backdrop-blur-md shadow-sm rounded-xl overflow-x-auto border border-slate-200">
       <table class="min-w-full text-sm whitespace-nowrap">
-        <thead class="bg-gray-100 border-b">
-          <tr class="text-left ">
-            <th class="px-4 py-2 text-gray-600 font-medium">Name</th>
-            <th class="px-4 py-2 text-gray-600 font-medium">Category</th>
-            <th class="px-4 py-2 text-gray-600 font-medium">Amount</th>
-            <th class="px-4 py-2 text-gray-600 font-medium">Due Date</th>
-            <th class="px-4 py-2 text-gray-600 font-medium">Days Before</th>
-            <th class="px-4 py-2 text-gray-600 font-medium">Email</th>
-            <th class="px-4 py-2 text-gray-600 font-medium">Paid</th>
-            <th class="px-4 py-2 text-gray-600 font-medium text-center">Actions</th>
+        <thead class="bg-slate-50/70 border-b border-slate-200/50">
+          <tr class="text-left bg-slate-200">
+            <th class="px-4 py-2.5 text-gray-600 font-medium">Name</th>
+            <th class="px-4 py-2.5 text-gray-600 font-medium">Category</th>
+            <th class="px-4 py-2.5 text-gray-600 font-medium">Amount</th>
+            <th class="px-4 py-2.5 text-gray-600 font-medium">Due Date</th>
+            <th class="px-4 py-2.5 text-gray-600 font-medium">Days Before</th>
+            <th class="px-4 py-2.5 text-gray-600 font-medium">Email</th>
+            <th class="px-4 py-2.5 text-gray-600 font-medium">Paid</th>
+            <th class="px-4 py-2.5 text-gray-600 font-medium text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="bill in bills"
             :key="bill.id"
-            class="border-b last:border-0 hover:bg-gray-50/50 transition-colors"
+            class="border-b last:border-0 hover:bg-slate-50/40 transition-colors border-slate-100"
           >
             <td class="px-4 py-2 font-medium text-gray-900">{{ bill.name }}</td>
             <td class="px-4 py-2 text-gray-600">{{ bill.category || "-" }}</td>
@@ -479,7 +479,7 @@ function closeDeleteConfirm() {
       v-if="showDeleteConfirm"
       class="fixed inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
     >
-      <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-150 text-center border">
+      <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 animate-in fade-in zoom-in-95 duration-150 text-center">
         <!-- Red warning icon -->
         <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4 text-red-600">
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
